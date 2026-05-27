@@ -111,7 +111,7 @@ div#menuToggle {
 }
 
 #login-container {
-  display: flex;
+  display: none;
   flex-flow: column nowrap;
   align-items: center;
   justify-content: center;
