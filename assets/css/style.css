@@ -1,0 +1,820 @@
+/* _________________________  FONTES _________________________ */
+@font-face {
+  font-family: "CotySans";
+  src: url("assets/fonts/CotySans-Regular-v1008.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* _________________________  VARIÁVEIS _________________________ */
+
+:root {
+  --font-family: "CotySans", sans-serif;
+  --primary-color: #2596be;
+  --secondary-color: #05125e;
+  --background-color: #dbdbdb;
+  --text-color: #000;
+  --black-1: #000000;
+  --white-1: #ffffff;
+  --red-1: #dd0d0d;
+
+  --verde1: #28a745;
+  --purple1: #035dab;
+  --purple2: #152580;
+  --purple3: #05125e;
+  --purple4: #eed7ff;
+  --blue1: #b1edf1;
+  --shadow1: hsla(0, 0%, 0%, 0.356);
+  --white1: #fff;
+  --white2: #f5f5f5;
+  --white3: #ccc;
+  --black1: #3f3f3f;
+  --primary: #48b4d0;
+  --secondary: #035dab;
+  --danger: #dc3545;
+  --novacor: #bbcce0;
+  --cor-positivo: #072bf5;
+  --cor-negativo: #ff0000;
+  --cor-neutro: #000;
+  --tr-even: white;
+  --tr-odd: silver;
+  --lista-requisições-bg: #d4c3e6;
+
+
+  font-family: var(--font-family);
+  margin: 20px;
+  padding: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+
+/* _________________________  PWA _________________________ */
+
+#pwa-install-banner {
+  display: flex;
+  top: 0;
+  left: 0;
+  flex-flow: column wrap;
+  background: var(--primary-color);
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-family: sans-serif;
+  position: fixed;
+  z-index: 9999;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+#pwa-install-banner p {
+  margin: 100px 0 100px 0;
+  font-size: 60px;
+}
+
+#pwa-install-banner div {
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+#pwa-install-banner button {
+  background: var(--secondary-color);
+  color: var(--white-1);
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#pwa-install-banner button#btn-instalar-pwa {
+  background: var(--white-1);
+  color: var(--primary-color);
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+
+
+
+
+/* _________________________  LOGIN _________________________ */
+
+div#menuToggle {
+  align-self: center;
+  text-align: center;
+}
+
+#login-container {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: center;
+  height: 90dvh;
+  width: 90dvw;
+  font-family: var(--font-family);
+}
+
+#login-container div {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  background: var(--white-1);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 70%;
+  height: 70%;
+}
+
+#login-container h2 {
+  color: var(--primary-color);
+  text-align: center;
+  font-size: 3rem;
+}
+
+#login-container input {
+  width: 80%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+#login-container button {
+  background: var(--primary-color);
+  color: var(--white-1);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+
+#login-container #login-erro {
+  color: var(--red-1);
+  margin-top: 10px;
+  font-size: 12px;
+  text-align: center;
+  display: none;
+}
+
+
+/* _________________________  ANIMAÇÕES _________________________ */
+
+* {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* _________________________  NAVBAR BOTTOM _________________________ */
+
+.navbar-bottom {
+  z-index: 999;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 12rem;
+  background-color: var(--primary-color);
+  display: flex;
+  flex-flow: wrap nowrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-around;
+  border-top: 2px solid var(--background-color);
+  color: var(--white-1);
+}
+
+span.button-active {
+  background: var(--background-color);
+  filter: blur(0.5px) !important;
+  color: var(--primary-color) !important;
+  cursor: default !important;
+}
+
+.button-bottom {
+  margin-top: 0;
+  margin-bottom: 0;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: space-evenly;
+  width: 13rem;
+  height: 100%;
+  border-radius: 0;
+  font-size: 2rem;
+}
+
+.secao {
+  margin-bottom: 13rem;
+}
+
+/* _________________________  LOADER _________________________ */
+
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--white-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  z-index: 9999;
+}
+
+#loader.hidden {
+  display: none;
+}
+
+.spinner {
+  border: 8px solid var(--background);
+  border-top: 8px solid var(--secondary-color);
+  border-radius: 50%;
+  width: 15rem;
+  height: 15rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/*_________________________  TIPOGRAFIA _________________________ */
+
+p,
+input,
+button,
+div,
+li,
+span,
+td,
+th {
+  line-height: 1.6;
+  letter-spacing: 0.5px;
+}
+
+
+
+.container-scroll {
+  max-height: 70rem;
+  overflow-y: auto;
+  border: 2px solid var(--primary-color);
+  border-radius: 4px;
+  background: var(--white-1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+
+#menuToggle label {
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: center;
+  align-items: center;
+  font-size: 8rem;
+  width: 300px;
+  height: 100px;
+  line-height: 90px;
+  text-align: center;
+  background: none;
+  color: var(--secondary-color);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px var(--shadow1);
+  margin-bottom: 4rem;
+  position: relative;
+  left: -2.5rem;
+}
+
+
+#menuToggle span.logo {
+  color: var(--primary-color);
+  font-weight: bolder;
+  font-size: 8.1rem;
+}
+
+#menuToggle input {
+  display: none;
+}
+
+
+#menuToggle input:checked~ul {
+  transform: translateY(0);
+}
+
+#menuToggle {
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ________________  FORMULÁRIOS E BOTÕES COM GRADIENTE E GLOW ____________________ */
+
+input,
+button {
+  margin: 10px 0;
+  padding: 10px;
+  font-size: 2rem;
+  width: 60rem;
+  box-sizing: border-box;
+  border-radius: 5px;
+}
+
+input {
+  color: var(--primary-color);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--white-1);
+  box-shadow: 0 0 0 3px rgba(72, 180, 208, 0.2), 0 0 12px var(--white-1);
+  transform: translateY(-2px);
+}
+
+button {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-color));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: var(--white-1);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 500px !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.sugestoes button {
+  border-radius: 0 !important;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+button:hover {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-color));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2), 0 0 12px var(--white-1);
+}
+
+button:hover::before {
+  left: 100%;
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/*__________________________  SECAO/TAREFAS _________________________ */
+
+.secao {
+  position: relative;
+  display: flex;
+  flex-flow: column wrap;
+  align-items: center;
+  margin-top: 20px;
+}
+
+
+.editar button {
+  border: 3px solid var(--black-1);
+  width: 23rem;
+  box-shadow: none;
+}
+
+.editar button:hover {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-color));
+  border: 3px solid var(--black-1);
+  color: var(--white-1);
+  box-shadow: 0 0 12px var(--white-1);
+}
+
+/* ========== 10. TAREFAS E CARDS ========== */
+.tarefa {
+  display: flex;
+  flex-flow: column wrap;
+  margin-top: 20px;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #fff, #f8f9fa);
+  font-size: 2rem;
+  width: 48rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.tarefa:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.tarefa:target {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 20px var(--primary-color);
+  background: linear-gradient(135deg, var(--purple4), #f9f0ff);
+  transform: scale(1.01);
+}
+
+.tarefa h3 {
+  margin-bottom: 10px;
+  font-size: 2.1rem;
+  border: 1px solid black;
+  border-radius: 500px;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-color));
+  color: var(--white-1);
+  min-width: 95%;
+  text-align: center;
+}
+
+/*__________________________  TABELAS ESTILIZADAS _________________________ */
+
+table {
+  min-width: 58rem;
+  color: var(--cor-neutro);
+  border-radius: 5px;
+  font-size: 2rem;
+  font-weight: bolder;
+}
+
+table td {
+  padding: 8px 12px;
+}
+
+table td:nth-child(odd) {
+  min-width: 15rem;
+  max-width: 15rem;
+}
+
+tr:nth-child(even) {
+  background: var(--tr-even);
+}
+
+table tr:nth-child(odd) {
+  background: var(--tr-odd);
+}
+
+li
+/*__________________________  VELOCIDADE __________________________ */
+
+.soon {
+  width: 500px;
+  height: 500px;
+  background: black;
+  border: 8px solid var(--primary-color);
+  /* Light grey background circle */
+  border-top: 8px solid var(--white-1);
+  /* Blue spinning part */
+  border-radius: 50%;
+  /* Makes it a circle */
+
+  /* Calls 'spin' animation, 2s duration, linear speed, infinite loop */
+  animation: soon 2s linear infinite;
+}
+
+@keyframes soon {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/*__________________________  REQUISIÇÕES E PESQUISA __________________________ */
+
+#requisicoes {
+  position: relative;
+  display: none;
+  flex-flow: column wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+#pesquisaReq {
+  display: none;
+  flex-flow: column wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+#exibePesqReq {
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+#buscaRequisicao::before {
+  display: none;
+}
+
+
+.item-quantidade {
+  background-color: var(--primary-color);
+  color: white;
+  border: 2px solid white;
+  align-self: center;
+  justify-self: center;
+  padding: 2px 16px;
+  cursor: default;
+  margin-left: 0;
+  max-width: 2rem;
+}
+
+.new-item {
+  display: grid;
+  grid-template-columns: 1fr 10fr 1fr;
+  max-width: 100%;
+  background-color: var(--white-1);
+  padding: 8px 12px;
+  border: 3px solid var(--black2);
+  margin: 0;
+}
+
+.new-item label {
+  justify-self: space-between;
+}
+
+
+.new-item .desc {
+  font-size: 1rem;
+  font-style: italic;
+  width: min-max-content(10rem, 10rem);
+  max-height: 1.5rem;
+}
+
+/*__________________________  SUGESTÕES __________________________ */
+
+#sugestoesEPI {
+  position: absolute;
+  top: 6.5rem;
+  width: 100%;
+
+}
+
+#sugestoesColaborador,
+#sugestoesBancoHoras {
+  position: absolute;
+  top: -5rem;
+  min-width: 100%;
+}
+
+.sugestoes {
+  margin-top: 12rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  z-index: 1000;
+  max-height: 450px;
+  overflow-y: auto;
+  min-width: 50rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  display: none;
+  border-radius: 9px;
+}
+
+.sugestoes button {
+  display: block;
+  font-size: 2.5rem;
+  text-align: left;
+  color: var(--primary-color);
+  padding: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  box-shadow: none;
+  width: 100%;
+  margin: 0;
+  border-radius: 0;
+  transition: all 0.2s ease;
+}
+
+.sugestoes button:hover {
+  background: linear-gradient(90deg, var(--white3), #ddd);
+  transform: translateX(5px);
+  box-shadow: none;
+}
+
+
+/*__________________________  ITENS DE LISTA __________________________ */
+
+.item-quantidade {
+  font-weight: bold;
+  cursor: default;
+}
+
+.descricao {
+  width: 41rem;
+  margin-left: 8px;
+  font-size: 2.6rem;
+  color: var(--primary-color);
+  font-style: italic;
+}
+
+.quantidade {
+  height: 3rem;
+  width: 8rem;
+  font-size: 2.6rem;
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+.desc {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-color));
+  border-radius: 500px;
+  font-style: italic;
+  color: var(--white-1);
+  font-size: 18px;
+  padding: 4px 8px;
+  cursor: default;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.perda {
+  background: linear-gradient(135deg, var(--vermelho-1), #b02a37);
+}
+
+.necessidade {
+  background: linear-gradient(135deg, var(--verde-1), #1e7e34);
+}
+
+.coletivo {
+  background: linear-gradient(135deg, var(--black-1), #2c2c2c);
+}
+
+.adicionar {
+  color: var(--primary-color);
+  max-width: 48rem;
+}
+
+li {
+  list-style: none;
+  padding: 3px;
+  margin: 0;
+  transition: all 0.2s ease;
+}
+
+li:hover {
+  transform: translateX(5px);
+}
+
+/*__________________________  UTILITARIOS __________________________ */
+
+.cb {
+  position: absolute;
+  margin-top: 0;
+  margin-left: 0;
+  width: 20px;
+  height: 20px;
+  font-size: 2rem;
+}
+
+.spanButton:hover {
+  cursor: pointer;
+  transform: scale(1.05);
+  display: inline-block;
+}
+
+span:hover {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/*__________________________  LINKS __________________________ */
+
+.menuColab {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  margin-left: 0 !important;
+  padding: 0 !important;
+}
+
+#menu-colab ul {
+  display: flex;
+  flex-flow: row nowrap;
+  margin-left: 0;
+  padding: 0 !important;
+}
+
+.links-colab li,
+a {
+  text-decoration: none;
+  padding: 8px 16px;
+  background-color: var(--white-1);
+  border-radius: 15px;
+  color: var(--white-1);
+  font-size: 1.5rem;
+  margin-left: 0;
+}
+
+
+/*__________________________  RESPONSIVIDADE __________________________ */
+
+@media screen and (min-width: 120px) {
+  body {
+    justify-items: center;
+    margin: 0;
+    padding: 0;
+  }
+
+  input,
+  button {
+    font-size: 3rem;
+    padding: 8px;
+    max-width: 50rem;
+    min-width: 90%;
+  }
+
+  .tarefa {
+    display: flex;
+    flex-flow: column wrap;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+
+  }
+
+  .tarefa h3 {
+    font-size: 2rem;
+    border: 1px solid black;
+  }
+
+  .sugestoes {
+    max-width: 80dvw;
+  }
+
+  #resultado,
+  #listaRequisicoes {
+    padding: 0;
+    font-size: 1.95rem;
+    margin-left: 0;
+    width: fit-content;
+  }
+}
+
+.tarefa ul {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.new-item .desc span {
+  font-size: .1rem;
+}
+
+@media screen and (min-width: 768px) {
+  .tarefa {
+    width: 48rem;
+  }
+
+  .tarefa h3 {
+    font-size: 2.1rem;
+  }
+
+  input,
+  button {
+    font-size: 2rem;
+    padding: 10px;
+    width: 60rem;
+  }
+  .navbar-bottom {
+    height: 8rem;
+  }
+}

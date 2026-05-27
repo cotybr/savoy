@@ -1,0 +1,49 @@
+let deferredPrompt;
+
+// Escuta o evento do navegador que diz que o app pode ser instalado
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Impede o prompt automático do navegador
+  e.preventDefault();
+  // Armazena o evento
+  deferredPrompt = e;
+
+  // Mostra o banner imediatamente (já que é para o colaborador ver na entrada)
+  const banner = document.getElementById('pwa-install-banner');
+  if (banner) {
+    banner.style.display = 'block';
+  }
+});
+
+// Lógica do botão de instalação
+document.addEventListener('DOMContentLoaded', () => {
+  const btnInstalar = document.getElementById('btn-instalar-pwa');
+
+  if (btnInstalar) {
+    btnInstalar.addEventListener('click', async () => {
+      if (!deferredPrompt) {
+        alert("O app já está instalado ou seu navegador não suporta a instalação direta.");
+        return;
+      }
+
+      // Mostra a pergunta oficial do sistema (Android/iOS/Chrome)
+      deferredPrompt.prompt();
+
+      // Verifica se o usuário aceitou ou cancelou
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`Resultado da instalação: ${outcome}`);
+
+      // Limpa o prompt para não ser usado de novo
+      deferredPrompt = null;
+
+      // Esconde o banner
+      document.getElementById('pwa-install-banner').style.display = 'none';
+    });
+  }
+});
+
+// Esconde o banner se o app for instalado por outros meios (ex: menu do Chrome)
+window.addEventListener('appinstalled', () => {
+  const banner = document.getElementById('pwa-install-banner');
+  if (banner) banner.style.display = 'none';
+  deferredPrompt = null;
+});
