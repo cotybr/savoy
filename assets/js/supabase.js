@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const loader = document.getElementById('loader');
             const loginContainer = document.getElementById('login-container');
             if (loader) loader.style.display = 'none';
-            if (loginContainer) loginContainer.style.display = 'flex';
+            if (loginContainer) loginContainer.style.display = 'none';
         }
     } catch (e) {
         console.error("Erro ao verificar sessão:", e);
