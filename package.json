@@ -1,0 +1,13 @@
+{
+  "name": "chatbot-fabrica",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "npx --yes serve . -l 3000",
+    "build": "node scripts/inject-env.mjs",
+    "validate": "node scripts/validate-build.mjs",
+    "predeploy": "npm run build && npm run validate"
+  },
+  "devDependencies": {}
+}

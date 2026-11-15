@@ -1,0 +1,81 @@
+name: Deploy — Staging
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy Staging
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.assistente.suaempresa.com.br
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+
+      # Injeção das variáveis a partir dos GitHub Secrets do environment "staging"
+      - name: Build (injeta variáveis)
+        env:
+          VITE_SUPABASE_URL:       ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY:  ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_APP_PEPPER:         ${{ secrets.VITE_APP_PEPPER }}
+          VITE_APP_ENV:            staging
+          VITE_APP_VERSION:        ${{ github.sha }}
+          VITE_MAX_INPUT_LENGTH:   "500"
+          VITE_RATE_LIMIT_TOKENS:  "10"
+          VITE_PDF_MAX_SIZE_MB:    "5"
+          VITE_PDF_MAX_PAGES:      "20"
+        run: npm run predeploy
+
+      # Guarda-costas: valida o build antes de enviar
+      - name: Validar artefato
+        run: npm run validate
+
+      # Deploy — escolha UM dos provedores abaixo
+
+      # --- Opção A: Netlify ---
+      - name: Deploy Netlify (staging)
+        uses: nwtgck/actions-netlify@v3
+        with:
+          publish-dir: ./dist
+          production-deploy: false
+          deploy-message: "staging@${{ github.sha }}"
+          alias: staging
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID:    ${{ secrets.NETLIFY_STAGING_SITE_ID }}
+
+      # --- Opção B: Vercel ---
+      # - name: Deploy Vercel (staging)
+      #   uses: amondnet/vercel-action@v25
+      #   with:
+      #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      #     vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+      #     vercel-project-id: ${{ secrets.VERCEL_STAGING_PROJECT_ID }}
+      #     working-directory: ./dist
+
+      # --- Opção C: AWS S3 + CloudFront ---
+      # - name: Deploy S3 (staging)
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     role-to-assume: ${{ secrets.AWS_STAGING_ROLE_ARN }}
+      #     aws-region: sa-east-1
+      # - run: aws s3 sync ./dist s3://meu-bucket-staging --delete
+      # - run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CF_STAGING_ID }} --paths "/*"
+
+      - name: Notificar sucesso
+        if: success()
+        run: 'echo "Staging publicado: ${{ github.sha }}"'

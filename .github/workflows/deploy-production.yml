@@ -1,0 +1,96 @@
+name: Deploy — Produção (aprovação manual)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false   # NUNCA cancelar deploy em produção
+
+jobs:
+  # Job 1: gate de aprovação manual via GitHub Environments
+  approval:
+    name: ⏸️ Aguardando aprovação
+    runs-on: ubuntu-latest
+    environment:
+      name: production   # ← configurar "Required reviewers" no GitHub
+    steps:
+      - run: echo "Aprovado por ${{ github.actor }} em $(date -u +%FT%TZ)"
+
+  # Job 2: deploy efetivo
+  deploy:
+    name: 🚀 Deploy Produção
+    runs-on: ubuntu-latest
+    needs: approval
+    environment:
+      name: production
+      url: https://assistente.suaempresa.com.br
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+
+      # Backup do último deploy (rollback)
+      - name: Snapshot pré-deploy
+        run: |
+          echo "SHA anterior: ${{ github.event.before }}" > /tmp/rollback.txt
+          cat /tmp/rollback.txt
+
+      - name: Build com secrets de PRODUÇÃO
+        env:
+          VITE_SUPABASE_URL:       ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY:  ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_APP_PEPPER:         ${{ secrets.VITE_APP_PEPPER }}
+          VITE_APP_ENV:            production
+          VITE_APP_VERSION:        ${{ github.sha }}
+          VITE_MAX_INPUT_LENGTH:   "500"
+          VITE_RATE_LIMIT_TOKENS:  "10"
+          VITE_PDF_MAX_SIZE_MB:    "5"
+          VITE_PDF_MAX_PAGES:      "20"
+        run: npm run predeploy
+
+      - name: Validar artefato (bloqueia deploy se falhar)
+        run: npm run validate
+
+      # Smoke tests antes de publicar
+      - name: Smoke test do HTML
+        run: |
+          grep -q "https://" dist/index.html
+          grep -qv "%%" dist/index.html || { echo "❌ placeholders restantes"; exit 1; }
+          echo "✅ Artefato OK"
+
+      # Deploy — Netlify (production)
+      - name: Deploy Netlify (production)
+        uses: nwtgck/actions-netlify@v3
+        with:
+          publish-dir: ./dist
+          production-deploy: true
+          deploy-message: "release@${{ github.sha }}"
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID:    ${{ secrets.NETLIFY_PRODUCTION_SITE_ID }}
+
+      # Tag de release
+      - name: Criar tag de release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Release v${{ github.run_number }}
+          body: |
+            Deploy em produção do commit ${{ github.sha }}
+            Autor: ${{ github.actor }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rollback automático em falha
+        if: failure()
+        run: |
+          echo "⚠️ Deploy falhou. Acionar rollback manual para: ${{ github.event.before }}"
+          echo "Comando: git revert ${{ github.sha }} && git push origin main"
