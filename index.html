@@ -1,147 +1,65 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self';
-                   script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net 'nonce-%%CSP_NONCE%%';
-                   style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
-                   img-src 'self' data: blob:;
-                   connect-src 'self' https://*.supabase.co;
-                   worker-src 'self' blob:;
-                   frame-ancestors 'none';
-                   base-uri 'self';
-                   form-action 'self';" />
-    <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <title>Assistente Industrial - Seguro</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
-    <style>
-        #chat-container {
-            max-width: 900px;
-            margin: 1rem auto;
-        }
-
-        #messages {
-            height: 55vh;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 1rem;
-            border-radius: 8px;
-            background: #fafafa;
-        }
-
-        .msg {
-            margin: .5rem 0;
-            padding: .6rem .9rem;
-            border-radius: 8px;
-            max-width: 80%;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-        }
-
-        .msg.user {
-            background: #d1e7dd;
-            margin-left: auto;
-            text-align: right;
-        }
-
-        .msg.bot {
-            background: #e2e3e5;
-        }
-
-        .msg.error {
-            background: #f8d7da;
-            color: #842029;
-        }
-
-        #lgpd-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, .6);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        #lgpd-modal.show {
-            display: flex;
-        }
-
-        #lgpd-modal .box {
-            background: #fff;
-            max-width: 640px;
-            padding: 2rem;
-            border-radius: 12px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .badge {
-            font-size: .75rem;
-            padding: .15rem .5rem;
-            border-radius: 4px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>Chatbot RH — Banco de Horas</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Supabase JS (CDN, versão fixa) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
+  <!-- PDF.js (CDN, versão fixa) -->
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.min.mjs" type="module" defer></script>
+  <script src="config.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
-
 <body>
-    <div id="lgpd-modal" role="dialog" aria-modal="true" aria-labelledby="lgpd-title">
-        <div class="box">
-            <h2 id="lgpd-title">🔒 Aviso de Privacidade e Consentimento (LGPD)</h2>
-            <p>Este assistente trata os seguintes dados pessoais, estritamente necessários:</p>
-            <ul>
-                <li><strong>Matrícula</strong> — identificação do colaborador;</li>
-                <li><strong>Requisições de EPI</strong> — controle de segurança do trabalho;</li>
-                <li><strong>Banco de horas</strong> — registro de jornada.</li>
-            </ul>
-            <p>Os dados de sessão são armazenados localmente no navegador (<code>sessionStorage</code>) e as consultas
-                trafegam por <strong>HTTPS</strong> até o Supabase, protegidas por políticas <strong>RLS</strong>.</p>
-            <p>Você pode revogar o consentimento a qualquer momento limpando os dados do navegador. A base legal é o
-                <em>consentimento</em> (Art. 7º, I, LGPD).</p>
-            <label>
-                <input type="checkbox" id="lgpd-check" />
-                Li e concordo com o tratamento dos meus dados conforme descrito.
-            </label>
-            <button id="lgpd-accept" disabled>Iniciar Atendimento</button>
-        </div>
+
+  <!-- ===== Banner LGPD / Cookies ===== -->
+  <div id="lgpd-overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="lgpd-title" hidden>
+    <div class="modal">
+      <h2 id="lgpd-title">Aviso de Privacidade e Cookies</h2>
+      <p>
+        Este chatbot utiliza <strong>armazenamento local (localStorage/sessionStorage)</strong>
+        para manter sua sessão e garantir o funcionamento do atendimento. Nenhum dado sensível
+        é compartilhado com terceiros sem seu consentimento. Ao continuar, você concorda com o
+        tratamento dos dados conforme a <strong>LGPD (Lei nº 13.709/2018)</strong>.
+      </p>
+      <ul>
+        <li>Dados coletados: matrícula, nome, tipo e conteúdo da solicitação.</li>
+        <li>Finalidade: registrar e responder sua solicitação de RH.</li>
+        <li>Base legal: execução de contrato / legítimo interesse (art. 7º, V e IX).</li>
+        <li>Você pode revogar o consentimento a qualquer momento limpando o armazenamento.</li>
+      </ul>
+      <div class="modal-actions">
+        <button id="btn-rejeitar" class="btn btn-secondary">Rejeitar</button>
+        <button id="btn-aceitar" class="btn btn-primary">Aceitar e continuar</button>
+      </div>
     </div>
+  </div>
 
-    <main class="container" id="chat-container" style="display:none;">
-        <h3>🤖 Assistente Industrial <span class="badge" id="session-badge"></span></h3>
-        <div id="messages" aria-live="polite"></div>
-        <form id="chat-form" autocomplete="off">
-            <input id="user-input" maxlength="500" placeholder="Digite sua mensagem..." required />
-            <button type="submit">Enviar</button>
-        </form>
-        <small>⚠️ Nunca digite senhas ou dados sensíveis neste chat.</small>
-    </main>
+  <!-- ===== App ===== -->
+  <main id="app" hidden>
+    <header class="chat-header">
+      <h1>🤖 Chatbot RH — Banco de Horas</h1>
+      <button id="btn-logout" class="btn btn-link" title="Revogar consentimento e limpar sessão">
+        Sair
+      </button>
+    </header>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
-        integrity="sha512-q3o0X0p1pKG9rT5gPrZ0oD6oPn7Rnj0R5rOaDxlE4ZtQbrcAYV+KW7TVO4VYqMzZRjRk3b4VnZ2j0dG9+0w=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <section id="chat-log" class="chat-log" aria-live="polite" aria-label="Histórico do chat"></section>
 
-    <!-- ============================================================
-         INJEÇÃO DE AMBIENTE — substituído no deploy por scripts/inject-env.mjs
-         NUNCA comitar valores reais neste bloco.
-         ============================================================ -->
-    <script>
-        (function () {
-            window.__SUPABASE_URL__ = "%%VITE_SUPABASE_URL%%";
-            window.__SUPABASE_ANON_KEY__ = "%%VITE_SUPABASE_ANON_KEY%%";
-            window.__APP_PEPPER__ = "%%VITE_APP_PEPPER%%";
-            window.__APP_ENV__ = "%%VITE_APP_ENV%%";
-            window.__APP_VERSION__ = "%%VITE_APP_VERSION%%";
-            window.__MAX_INPUT_LENGTH__ = Number("%%VITE_MAX_INPUT_LENGTH%%") || 500;
-            window.__RATE_LIMIT_TOKENS__ = Number("%%VITE_RATE_LIMIT_TOKENS%%") || 10;
-            window.__PDF_MAX_SIZE_MB__ = Number("%%VITE_PDF_MAX_SIZE_MB%%") || 5;
-            window.__PDF_MAX_PAGES__ = Number("%%VITE_PDF_MAX_PAGES%%") || 20;
-        })();
-    </script>
+    <form id="chat-form" class="chat-form" autocomplete="off">
+      <label for="chat-input" class="sr-only">Mensagem</label>
+      <input id="chat-input" type="text" maxlength="500" placeholder="Digite sua mensagem..." required />
+      <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
 
-    <script src="/config.js"></script>
-    <script type="module" src="/js/app.js"></script>
+    <p class="disclaimer">
+      ⚠️ Este chatbot não substitui o RH.
+    </p>
+  </main>
+
+  <noscript>Este chatbot requer JavaScript habilitado.</noscript>
 </body>
-
 </html>

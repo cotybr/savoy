@@ -1,0 +1,10 @@
+# Segredos locais
+config.local.js
+.env
+.env.*
+*.local
+
+# Dependências / artefatos
+node_modules/
+dist/
+.DS_Store
