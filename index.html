@@ -1,65 +1,706 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="referrer" content="strict-origin-when-cross-origin" />
-  <title>Chatbot RH — Banco de Horas</title>
-  <link rel="stylesheet" href="styles.css" />
-  <!-- Supabase JS (CDN, versão fixa) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
-  <!-- PDF.js (CDN, versão fixa) -->
-  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.min.mjs" type="module" defer></script>
-  <script src="config.js" defer></script>
-  <script src="app.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Fabril - Banco de Horas</title>
+    <style>
+        /* Reset e Estilos Básicos */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Container do Chat */
+        .chat-container {
+            width: 100%;
+            max-width: 480px;
+            height: 640px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Header */
+        .chat-header {
+            background: #0056b3;
+            color: #fff;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header h1 {
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .chat-header #versao {
+            font-size: 0.7rem;
+            opacity: 0.85;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .chat-header #connection-status {
+            font-size: 0.7rem;
+        }
+
+        /* Painel de status do PDF */
+        #resultado {
+            padding: 6px 15px;
+            background: #f8f9fa;
+            font-size: 0.75rem;
+            color: #555;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        /* Área de Mensagens */
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #e9ecef;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .message.bot {
+            background: #fff;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .message.user {
+            background: #0056b3;
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .message.system {
+            background: #ffc107;
+            color: #333;
+            align-self: center;
+            font-size: 0.78rem;
+            text-align: center;
+            max-width: 92%;
+        }
+
+        /* Input Area */
+        .chat-input-area {
+            padding: 15px;
+            background: #fff;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 20px;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .chat-input-area input:disabled {
+            background: #f1f3f5;
+            cursor: not-allowed;
+        }
+
+        .chat-input-area button {
+            background: #0056b3;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .chat-input-area button:hover {
+            background: #004494;
+        }
+
+        .chat-input-area button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* Overlay LGPD */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal h2 {
+            color: #0056b3;
+            margin-bottom: 15px;
+            font-size: 1.25rem;
+        }
+
+        .modal p {
+            font-size: 0.88rem;
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.55;
+            text-align: justify;
+        }
+
+        .modal .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .modal button {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .modal button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-accept {
+            background: #0056b3;
+            color: #fff;
+        }
+
+        .btn-reject {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
+
 <body>
 
-  <!-- ===== Banner LGPD / Cookies ===== -->
-  <div id="lgpd-overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="lgpd-title" hidden>
-    <div class="modal">
-      <h2 id="lgpd-title">Aviso de Privacidade e Cookies</h2>
-      <p>
-        Este chatbot utiliza <strong>armazenamento local (localStorage/sessionStorage)</strong>
-        para manter sua sessão e garantir o funcionamento do atendimento. Nenhum dado sensível
-        é compartilhado com terceiros sem seu consentimento. Ao continuar, você concorda com o
-        tratamento dos dados conforme a <strong>LGPD (Lei nº 13.709/2018)</strong>.
-      </p>
-      <ul>
-        <li>Dados coletados: matrícula, nome, tipo e conteúdo da solicitação.</li>
-        <li>Finalidade: registrar e responder sua solicitação de RH.</li>
-        <li>Base legal: execução de contrato / legítimo interesse (art. 7º, V e IX).</li>
-        <li>Você pode revogar o consentimento a qualquer momento limpando o armazenamento.</li>
-      </ul>
-      <div class="modal-actions">
-        <button id="btn-rejeitar" class="btn btn-secondary">Rejeitar</button>
-        <button id="btn-aceitar" class="btn btn-primary">Aceitar e continuar</button>
-      </div>
+    <!-- Modal de Consentimento LGPD -->
+    <div id="lgpd-overlay" class="overlay">
+        <div class="modal">
+            <h2>Termo de Consentimento e Privacidade</h2>
+            <p>
+                Para utilizar este canal de atendimento, precisamos armazenar informações
+                de sessão (cookies/localStorage) estritamente necessárias para o
+                funcionamento do chat e registro seguro de suas requisições de consulta
+                ao banco de horas.
+                <br><br>
+                <strong>Não coletamos dados sensíveis.</strong> Suas mensagens são
+                utilizadas apenas para processar sua solicitação. Ao clicar em
+                "Aceitar e Continuar", você concorda com o tratamento de seus dados
+                conforme a LGPD (Lei 13.709/2018).
+            </p>
+            <div class="btn-group">
+                <button id="btn-reject" class="btn-reject">Rejeitar</button>
+                <button id="btn-accept" class="btn-accept">Aceitar e Continuar</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- ===== App ===== -->
-  <main id="app" hidden>
-    <header class="chat-header">
-      <h1>🤖 Chatbot RH — Banco de Horas</h1>
-      <button id="btn-logout" class="btn btn-link" title="Revogar consentimento e limpar sessão">
-        Sair
-      </button>
-    </header>
+    <!-- Container Principal do Chat -->
+    <div class="chat-container">
+        <div class="chat-header">
+            <div>
+                <h1>Atendimento Fabril</h1>
+                <span id="versao">Carregando versão...</span>
+            </div>
+            <span id="connection-status">🔒 Seguro</span>
+        </div>
 
-    <section id="chat-log" class="chat-log" aria-live="polite" aria-label="Histórico do chat"></section>
+        <!-- Painel de status do PDF -->
+        <div id="resultado">Aguardando consentimento...</div>
 
-    <form id="chat-form" class="chat-form" autocomplete="off">
-      <label for="chat-input" class="sr-only">Mensagem</label>
-      <input id="chat-input" type="text" maxlength="500" placeholder="Digite sua mensagem..." required />
-      <button type="submit" class="btn btn-primary">Enviar</button>
-    </form>
+        <div id="chat-messages" class="chat-messages">
+            <!-- Mensagens aparecerão aqui -->
+        </div>
 
-    <p class="disclaimer">
-      ⚠️ Este chatbot não substitui o RH.
-    </p>
-  </main>
+        <div class="chat-input-area">
+            <input type="text" id="user-input" placeholder="Digite sua mensagem..." disabled>
+            <button id="send-btn" disabled>Enviar</button>
+        </div>
+    </div>
 
-  <noscript>Este chatbot requer JavaScript habilitado.</noscript>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    </script>
+
+    <script>
+        // ============================================================
+        // 1. CLASSES BASE OBRIGATÓRIAS (MANTIDAS EXATAMENTE)
+        // ============================================================
+        class Linha {
+            constructor(numero, setor) {
+                this.numero = numero;
+                this.setor = setor;
+                this.colaboradores = [];
+            }
+
+            alocar(colaborador) {
+                const alocado = this.colaboradores.some(c => c.matricula === colaborador.matricula);
+                if (!alocado) {
+                    this.colaboradores.push(colaborador);
+                    return `${colaborador.nome.split(' ')[0]} alocado com sucesso nesta linha.`;
+                } else {
+                    return `${colaborador.nome.split(' ')[0]} já alocado nesta linha.`;
+                }
+            }
+
+            realocar(colaborador, destino) {
+                const index = this.colaboradores.findIndex(c => c.matricula === colaborador.matricula);
+                if (index !== -1) {
+                    this.colaboradores.splice(index, 1);
+                    destino.alocar(colaborador);
+                    return `${colaborador.nome.split(' ')[0]} realocado para a linha ${destino.numero}.`;
+                } else {
+                    return `${colaborador.nome.split(' ')[0]} não encontrado nesta linha.`;
+                }
+            }
+
+            modAlocada() {
+                return this.colaboradores;
+            }
+        }
+
+        class Colaborador {
+            constructor(nome, cargo, setor, matricula, funcao) {
+                this.nome = nome;
+                this.cargo = cargo;
+                this.setor = setor;
+                this.matricula = matricula;
+                this.funcao = funcao;
+            }
+
+            linha(linha) {
+                this.linha = linha;
+                return `${this.nome.split(' ')[0]} alocado na linha ${linha.numero}.`;
+            }
+        }
+
+        // ============================================================
+        // 2. CONFIGURAÇÃO SUPABASE (anon key + RLS)
+        // ============================================================
+        // Substitua pelos valores reais do painel do Supabase.
+        // NUNCA use a service_role key no frontend.
+        const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
+        const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_AQUI';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ============================================================
+        // 3. ESTADO GLOBAL
+        // ============================================================
+        const state = {
+            consentGiven: false,
+            colaboradores: [],   // instâncias de Colaborador (referência)
+            bancoHoras: [],      // dados estruturados do PDF
+        };
+
+        // ============================================================
+        // 4. SANITIZAÇÃO E UTILITÁRIOS
+        // ============================================================
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function isValidInput(text) {
+            if (!text || typeof text !== 'string') return false;
+            const t = text.trim();
+            if (t.length === 0 || t.length > 500) return false;
+            if (/[\x00-\x08\x0B\x0C\x0E-\x1F]/.test(t)) return false;
+            return true;
+        }
+
+        function appendMessage(text, sender) {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            div.textContent = text; // blindagem XSS
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // ============================================================
+        // 5. LEITURA E ESTRUTURAÇÃO DO BANCO DE HORAS (PDF)
+        // ============================================================
+        async function carregarBancoHorasPDF() {
+            const elResultado = document.getElementById("resultado");
+            try {
+                const res = await fetch("bancodehoras.pdf");
+                if (!res.ok) throw new Error("Falha ao buscar PDF");
+                const data = await res.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data }).promise;
+
+                const paginas = [];
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    paginas.push(content.items.map(item => item.str).join(" "));
+                }
+                const textoPDF = paginas.join("\n");
+
+                // Versão (data de atualização)
+                const matchVersion = textoPDF.match(/\s*(\d{2}\/\d{2}\/\d{4})/);
+                const elVersao = document.getElementById("versao");
+                if (elVersao) {
+                    elVersao.textContent = matchVersion
+                        ? `Última atualização: ${matchVersion[1]}`
+                        : "Data de atualização não encontrada";
+                }
+
+                // Regex de colaboradores (mesma do exemplo fornecido)
+                const regexUnica = /(\d{7,}) - ([A-Z\sÇÃÕÂÊÁÉÍÓÚà-ú\-']+)\s+([-\d:]+)\s+([-\d:]+)\s+([-\d:]+)\s+([-\d:]+)|(\d{12,}) - ([A-Z\sÇÃÕÂÊÁÉÍÓÚà-ú\']+)/g;
+
+                const formatarCDC = cdc =>
+                    cdc.startsWith("60006005000") ? cdc.slice(11) : cdc;
+                const formatarMatricula = m =>
+                    (m.startsWith("6005") || m.startsWith("2009")) ? m.slice(4) : m;
+
+                let match;
+                let dadosSetor = { cdc: "Não Identificado", setor: "Não Identificado" };
+                const extraidos = [];
+
+                while ((match = regexUnica.exec(textoPDF)) !== null) {
+                    if (match[7]) {
+                        dadosSetor = { cdc: match[7].trim(), setor: match[8].trim() };
+                    } else if (match[1]) {
+                        const matriculaLimpa = formatarMatricula(match[1].trim());
+                        const dadosNoCSV = state.colaboradores.find(
+                            c => formatarMatricula(c.matricula) === matriculaLimpa
+                        );
+                        const partesNome = match[2].trim().split(" ");
+                        const nomeCurto = `${partesNome[0]} ${partesNome[partesNome.length - 1]}`;
+                        extraidos.push({
+                            cdc: formatarCDC(dadosSetor.cdc),
+                            setor: dadosSetor.setor,
+                            matricula: matriculaLimpa,
+                            nome: nomeCurto,
+                            funcao: dadosNoCSV ? dadosNoCSV.funcao : "Função não encontrada",
+                            saldoAnterior: match[3].trim(),
+                            horasCredito: match[4].trim(),
+                            horasDebito: match[5].trim(),
+                            saldoAtual: match[6].trim(),
+                        });
+                    }
+                }
+
+                state.bancoHoras = extraidos;
+
+                // Upsert em banco_horas (se houver dados)
+                if (extraidos.length > 0) {
+                    const { error } = await supabaseClient
+                        .from('banco_horas')
+                        .upsert(extraidos.map(c => ({
+                            matricula: c.matricula,
+                            nome: c.nome,
+                            cdc: c.cdc,
+                            setor: c.setor,
+                            funcao: c.funcao,
+                            saldo_anterior: c.saldoAnterior,
+                            horas_credito: c.horasCredito,
+                            horas_debito: c.horasDebito,
+                            saldo_atual: c.saldoAtual,
+                            atualizado_em: new Date().toISOString(),
+                        })), { onConflict: 'matricula' });
+
+                    if (error) console.error("Erro ao gravar banco_horas:", error.message);
+                }
+
+                if (elResultado) {
+                    elResultado.textContent =
+                        `PDF carregado: ${extraidos.length} colaboradores importados.`;
+                }
+                return extraidos;
+            } catch (err) {
+                console.error(err);
+                if (elResultado) elResultado.textContent = "Erro ao carregar o PDF.";
+                return [];
+            }
+        }
+
+        // ============================================================
+        // 6. COLABORADORES (apenas leitura de referência)
+        // ============================================================
+        async function carregarColaboradores() {
+            const { data, error } = await supabaseClient
+                .from('colaboradores')
+                .select('*');
+            if (error) {
+                console.error("Erro ao carregar colaboradores:", error.message);
+                return;
+            }
+            state.colaboradores = (data || []).map(row =>
+                new Colaborador(row.nome, row.cargo, row.setor, row.matricula, row.funcao)
+            );
+        }
+
+        // ============================================================
+        // 7. CONSULTA AO BANCO DE HORAS
+        // ============================================================
+        async function consultarBancoHoras(matricula) {
+            if (!matricula || !/^\d+$/.test(matricula)) {
+                return "Informe uma matrícula numérica válida. Ex: banco 123456";
+            }
+
+            // Tenta no Supabase primeiro
+            const { data, error } = await supabaseClient
+                .from('banco_horas')
+                .select('*')
+                .eq('matricula', matricula)
+                .maybeSingle();
+
+            if (!error && data) {
+                return formatarRespostaBancoHoras(data);
+            }
+
+            // Fallback: consulta local (extraído do PDF na sessão)
+            const local = state.bancoHoras.find(c => c.matricula === matricula);
+            if (local) return formatarRespostaBancoHoras(local);
+
+            return `Matrícula ${matricula} não encontrada no banco de horas.`;
+        }
+
+        function formatarRespostaBancoHoras(c) {
+
+
+            if (c.saldoAtual > 0 || c.saldo_atual > 0) {
+                return [
+                    `${c.nome}, você possui ${c.saldoAtual || c.saldo_atual} de saldo atual.`,
+                    "Você tem saldo positivo.",
+                ].join('\n');
+            } else if (c.saldoAtual < 0 || c.saldo_atual < 0) {
+                return [
+                    `${c.nome}, você possui ${c.saldoAtual || c.saldo_atual} de saldo atual.`,
+                    "Você está com saldo negativo.",
+                ].join('\n');
+            } else {
+
+                return [
+                    `${c.nome}, você possui ${c.saldoAtual || c.saldo_atual || '—'} de saldo atual.`,
+                    `Você está com saldo zerado.`,
+                ].join('\n');
+            }
+        }
+        // ============================================================
+        // 8. REQUISIÇÕES: CRIAR E LISTAR
+        // ============================================================
+        async function criarRequisicao(mensagem, matricula = null, tipo = 'consulta_banco_horas') {
+            if (!isValidInput(mensagem)) throw new Error("Mensagem inválida.");
+            const { data, error } = await supabaseClient
+                .from('requisicoes_chat')
+                .insert([{
+                    mensagem: escapeHTML(mensagem.trim()),
+                    matricula: matricula ? escapeHTML(matricula.trim()) : null,
+                    tipo,
+                    status: 'pendente',
+                }])
+                .select()
+                .single();
+
+            if (error) throw new Error(error.message);
+            return data;
+        }
+
+        async function listarRequisicoes() {
+            const { data, error } = await supabaseClient
+                .from('requisicoes_chat')
+                .select('*')
+                .order('criado_em', { ascending: false });
+            if (error) throw new Error(error.message);
+            return data || [];
+        }
+
+        // ============================================================
+        // 9. ROTEADOR DE COMANDOS DO CHAT
+        // ============================================================
+        async function processarComando(texto) {
+            const t = texto.toLowerCase().trim();
+
+            // Consulta de banco de horas: "banco 123456" / "horas 123456"
+            if (t.startsWith('banco') || t.startsWith('horas')) {
+                const matricula = t.replace(/[^0-9]/g, '');
+                const resposta = await consultarBancoHoras(matricula);
+                try {
+                    await criarRequisicao(
+                        `Consulta banco de horas: matrícula ${matricula}`,
+                        matricula,
+                        'consulta_banco_horas'
+                    );
+                } catch (e) { console.error(e); }
+                return resposta;
+            }
+
+            // Criar requisição manual: "solicitar <texto>"
+            if (t.startsWith('solicitar ')) {
+                const msg = texto.substring(10).trim();
+                const req = await criarRequisicao(msg, null, 'solicitacao_manual');
+                return `Requisição #${req.id} registrada. Status: pendente.`;
+            }
+
+            // Listar requisições: "listar"
+            if (t === 'listar' || t.startsWith('listar ')) {
+                const reqs = await listarRequisicoes();
+                if (reqs.length === 0) return "Nenhuma requisição encontrada.";
+                return "Requisições:\n" + reqs.map(r =>
+                    `#${r.id} [${r.status}] ${r.tipo} — ${r.mensagem}`
+                ).join("\n");
+            }
+
+            // Ajuda
+            if (t === 'ajuda' || t === 'help') {
+                return [
+                    "Comandos disponíveis:",
+                    "• banco <matrícula>  → consulta o banco de horas",
+                    "• solicitar <texto>  → cria uma requisição",
+                    "• listar             → lista todas as requisições",
+                ].join("\n");
+            }
+
+            // Fallback: registra como requisição genérica
+            const req = await criarRequisicao(texto, null, 'geral');
+            return `Registrei sua mensagem como requisição #${req.id}. Status: pendente.`;
+        }
+
+        // ============================================================
+        // 10. LGPD + INICIALIZAÇÃO
+        // ============================================================
+        function checkConsent() {
+            if (localStorage.getItem('lgpd_consent_fabrica') === 'true') {
+                state.consentGiven = true;
+                document.getElementById('lgpd-overlay').classList.add('hidden');
+                enableChat();
+                initChat();
+            } else {
+                document.getElementById('lgpd-overlay').classList.remove('hidden');
+            }
+        }
+
+        function acceptConsent() {
+            localStorage.setItem('lgpd_consent_fabrica', 'true');
+            state.consentGiven = true;
+            document.getElementById('lgpd-overlay').classList.add('hidden');
+            enableChat();
+            initChat();
+        }
+
+        function rejectConsent() {
+            alert("O chat não pode ser utilizado sem consentimento.");
+        }
+
+        function enableChat() {
+            document.getElementById('user-input').disabled = false;
+            document.getElementById('send-btn').disabled = false;
+            document.getElementById('user-input').focus();
+        }
+
+        async function initChat() {
+            appendMessage(
+                "Olá! Sou o assistente virtual. Posso consultar seu banco de horas e registrar requisições.\n\n" +
+                "Comandos: banco <matrícula> | solicitar <texto> | listar | ajuda",
+                "bot"
+            );
+            await carregarColaboradores();
+            await carregarBancoHorasPDF();
+        }
+
+        async function handleSend() {
+            const input = document.getElementById('user-input');
+            const raw = input.value;
+            if (!isValidInput(raw)) {
+                appendMessage("Mensagem inválida (1–500 caracteres).", "system");
+                return;
+            }
+            const clean = escapeHTML(raw.trim());
+            appendMessage(clean, "user");
+            input.value = '';
+
+            try {
+                const resposta = await processarComando(clean);
+                appendMessage(resposta, "bot");
+            } catch (err) {
+                appendMessage(`Erro: ${escapeHTML(err.message)}`, "system");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkConsent();
+            document.getElementById('btn-accept').addEventListener('click', acceptConsent);
+            document.getElementById('btn-reject').addEventListener('click', rejectConsent);
+            document.getElementById('send-btn').addEventListener('click', handleSend);
+            document.getElementById('user-input').addEventListener('keypress', e => {
+                if (e.key === 'Enter') { e.preventDefault(); handleSend(); }
+            });
+        });
+    </script>
 </body>
+
 </html>

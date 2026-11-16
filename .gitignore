@@ -1,10 +1,18 @@
-# Segredos locais
-config.local.js
-.env
-.env.*
-*.local
-
-# Dependências / artefatos
+# Dependências
 node_modules/
-dist/
+
+# Variáveis de Ambiente (NUNCA comitar chaves reais)
+.env
+.env.local
+.env.production
+
+# Configurações de IDE
+.vscode/
+.idea/
+
+# Sistema Operacional
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
