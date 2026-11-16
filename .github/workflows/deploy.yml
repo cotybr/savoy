@@ -1,10 +1,9 @@
-# .github/workflows/deploy.yml
-on: { push: { branches: [main] } }
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6          # v4 → v6
+
       - run: |
           cat > config.js <<EOF
           window.APP_CONFIG = {
@@ -13,6 +12,8 @@ jobs:
             PDF_URL: "./bancodehoras.pdf"
           };
           EOF
-      - uses: actions/upload-pages-artifact@v3
+
+      - uses: actions/upload-pages-artifact@v5   # v3 → v5（内部已是 Node 24）
         with: { path: . }
-      - uses: actions/deploy-pages@v4
+
+      - uses: actions/deploy-pages@v5            # v4 → v5
